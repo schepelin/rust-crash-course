@@ -1,3 +1,5 @@
+mod fizzbuzz;
+
 #[cfg(test)]
 mod tests {
     #[test]
