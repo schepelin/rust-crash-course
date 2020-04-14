@@ -102,16 +102,12 @@ impl Display for Game {
 }
 
 fn main() -> Result<(), parse_args::ParseError> {
-    match parse_args::parse_args() {
-        Err(e) => Err(e),
-        Ok(frame) => {
-            let mut game = Game::new(frame);
-            let delay = std::time::Duration::from_millis(33);
-            loop {
-                println!("{}", game);
-                game.step();
-                std::thread::sleep(delay);
-            }
-        }
+    let frame = parse_args::parse_args()?;
+    let mut game = Game::new(frame);
+    let delay = std::time::Duration::from_millis(33);
+    loop {
+        println!("{}", game);
+        game.step();
+        std::thread::sleep(delay);
     }
 }

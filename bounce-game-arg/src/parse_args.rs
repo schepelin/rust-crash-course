@@ -5,6 +5,8 @@ pub enum ParseError {
     TooFewArgs,
     TooManyArgs,
     InvalidInteger(String),
+    WidthTooSmall(usize),
+    HeightTooSmall(usize),
 }
 
 #[derive(Debug)]
@@ -50,6 +52,14 @@ pub fn parse_args() -> Result<Frame, ParseError> {
     args.require_no_arg()?;
     let width = parse_usize(&width)?;
     let height = parse_usize(&height)?;
+
+    if height < 2 {
+        return Err(ParseError::HeightTooSmall(height));
+    }
+
+    if width < 2 {
+        return Err(ParseError::WidthTooSmall(width));
+    }
 
     Ok(Frame{
         width,
