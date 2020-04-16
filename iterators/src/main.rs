@@ -43,15 +43,11 @@ impl Fibonacci {
             next: 1,
         }
     }
-    fn value(&self) -> usize {
-        self.current
-    }
 }
 
 impl Iterator for Fibonacci {
     type Item = usize;
     fn next(&mut self) -> Option<Self::Item> {
-        let res = Some(self.current);
         let orig_cur = self.current;
         let orig_next = self.next;
 
@@ -73,7 +69,7 @@ struct Doubler<I> {
 impl<I> Iterator for Doubler<I>
 where
     I: Iterator,
-    I::Item: std::ops::Add<Output=I::Item> + Copy,
+    I::Item: std::ops::Add<Output = I::Item> + Copy,
 {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
@@ -81,6 +77,17 @@ where
             Some(val) => Some(val + val),
             None => None,
         }
+    }
+}
+
+struct InfiniteUnit;
+
+impl IntoIterator for InfiniteUnit {
+    type Item = usize;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        vec![0; 10].into_iter()
     }
 }
 
@@ -102,9 +109,20 @@ fn main() {
         println!("next fib is: {}", num);
     }
 
-    let doubler = Doubler{iter: Fibonacci::new()};
+    let doubler = Doubler {
+        iter: Fibonacci::new(),
+    };
 
     for num in doubler.take(10) {
         println!("Doubled: {}", num);
+    }
+
+    let mut count = 0;
+    for _ in InfiniteUnit {
+        count += 1;
+        println!("count == {}", count);
+        if count >= 5 {
+            break;
+        }
     }
 }
