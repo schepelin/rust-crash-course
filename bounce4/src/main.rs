@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use pancurses::{Window, Input, initscr, endwin};
 
 enum VertDir {
     Up,
@@ -29,14 +29,19 @@ struct Game {
 }
 
 impl Game {
-    fn new(frame: Frame) -> Game {
+    fn new(window: &Window) -> Game {
+        let (max_y, max_x) = window.get_max_yx();
+        let frame = Frame {
+            width: (max_x - 4) as u32,
+            height: (max_y - 4) as u32,
+        };
         let ball = Ball {
             x: 2,
             y: 4,
             vert_dir: VertDir::Up,
             horiz_dir: HorizDir::Left,
         };
-        Game {frame, ball}
+        Game { frame, ball }
     }
 
     fn step(&mut self) {
@@ -72,54 +77,29 @@ impl Ball {
     }
 }
 
-impl Display for Game {
-    fn fmt(&self, fmt: &mut Formatter) -> std::fmt::Result {
-        let top_bottom = |fmt: &mut Formatter| {
-            write!(fmt, "+")?;
-            for _ in 0..self.frame.width {
-                write!(fmt, "-")?;
-            }
-            write!(fmt, "+\r")
-        };
+fn main() -> Result<(), String> {
+    let window = initscr();
 
-        top_bottom(fmt)?;
+    window.timeout(33);
+    let mut game = Game::new(&window);
 
-        for row in 0..self.frame.height {
-            write!(fmt, "|")?;
-
-            for column in 0..self.frame.width {
-                let c = if row == self.ball.y && column == self.ball.x {
-                    'o'
-                } else {
-                    ' '
-                };
-                write!(fmt, "{}", c)?;
-            }
-
-            write!(fmt, "|\n")?;
-        }
-
-        top_bottom(fmt)
-    }
-}
-
-fn main () {
-    let window = pancurses::initscr();
-    let (max_y, max_x) = window.get_max_yx();
-
-    let frame = Frame{
-        width: (max_x - 4) as u32,
-        height: (max_y -4) as u32,
-
-    };
-
-    let mut game = Game::new(frame);
-    let sleep_duration = std::time::Duration::from_millis(33);
     loop {
         window.clear();
-        window.printw(game.to_string());
+        window.border('|', '|', '-', '-', '+', '+', '+', '+');
+        window.mvaddch(game.ball.y as i32 + 1, game.ball.x as i32 + 1, 'o');
+        window.mv(0, 0);
         window.refresh();
-        game.step();
-        std::thread::sleep(sleep_duration);
+
+        match window.getch() {
+            Some(Input::Character('q')) => {
+                endwin();
+                println!("Thanks for wathcing!");
+                return Ok(());
+            },
+            Some(Input::KeyResize) => {
+                game = Game::new(&window);
+            },
+            _ => game.step()
+        };
     }
 }
