@@ -1,4 +1,4 @@
-
+#[allow(dead_code)]
 fn fizzbuzz_step(i: usize) -> String {
     match (i % 3, i % 5) {
         (0, 0) => String::from("fizzbuzz"),
