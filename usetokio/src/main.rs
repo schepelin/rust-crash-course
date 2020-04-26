@@ -1,10 +1,9 @@
-use tokio::io;
-
+use tokio::process::Command;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error>{
-    let mut stdout = io::stdout();
-    let mut hello: &[u8] = b"Hello world!\n";
-    io::copy(&mut hello, &mut stdout).await?;
+    for _ in 1..10 {
+        Command::new("echo").arg("Hello world").spawn()?.await?;
+    }
     Ok(())
 }
