@@ -5,11 +5,11 @@ use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error>{
-    Command::new("date").spawn()?.await?;
-    time::delay_for(Duration::from_secs(1)).await;
-    Command::new("date").spawn()?.await?;
-    time::delay_for(Duration::from_secs(1)).await;
-    Command::new("date").spawn()?.await?;
+    let mut interval = time::interval(Duration::from_secs(1));
 
-    Ok(())
+    loop {
+        interval.tick().await;
+        Command::new("date").spawn()?.await?;
+    }
+
 }
